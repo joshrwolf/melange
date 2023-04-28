@@ -41,6 +41,7 @@ func New() *cobra.Command {
 	cmd.AddCommand(Keygen())
 	cmd.AddCommand(Index())
 	cmd.AddCommand(SignIndex())
+	cmd.AddCommand(Schema())
 	cmd.AddCommand(UpdateCache())
 	cmd.AddCommand(Convert())
 	cmd.AddCommand(PackageVersion())

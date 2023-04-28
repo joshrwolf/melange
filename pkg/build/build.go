@@ -57,32 +57,37 @@ type Scriptlets struct {
 		Paths  []string
 	} `yaml:"trigger,omitempty"`
 
-	PreInstall    string `yaml:"pre-install,omitempty"`
-	PostInstall   string `yaml:"post-install,omitempty"`
-	PreDeinstall  string `yaml:"pre-deinstall,omitempty"`
-	PostDeinstall string `yaml:"post-deinstall,omitempty"`
-	PreUpgrade    string `yaml:"pre-upgrade,omitempty"`
-	PostUpgrade   string `yaml:"post-upgrade,omitempty"`
+	PreInstall    string `json:"pre-install,omitempty"`
+	PostInstall   string `json:"post-install,omitempty"`
+	PreDeinstall  string `json:"pre-deinstall,omitempty"`
+	PostDeinstall string `json:"post-deinstall,omitempty"`
+	PreUpgrade    string `json:"pre-upgrade,omitempty"`
+	PostUpgrade   string `json:"post-upgrade,omitempty"`
 }
 
 type PackageOption struct {
-	NoProvides bool `yaml:"no-provides"`
-	NoDepends  bool `yaml:"no-depends"`
-	NoCommands bool `yaml:"no-commands"`
+	NoProvides bool `json:"no-provides"`
+	NoDepends  bool `json:"no-depends"`
+	NoCommands bool `json:"no-commands"`
 }
 
 type Package struct {
-	Name               string        `yaml:"name"`
-	Version            string        `yaml:"version"`
-	Epoch              uint64        `yaml:"epoch"`
-	Description        string        `yaml:"description,omitempty"`
-	URL                string        `yaml:"url,omitempty"`
-	Commit             string        `yaml:"commit,omitempty"`
-	TargetArchitecture []string      `yaml:"target-architecture,omitempty"`
-	Copyright          []Copyright   `yaml:"copyright,omitempty"`
-	Dependencies       Dependencies  `yaml:"dependencies,omitempty"`
-	Options            PackageOption `yaml:"options,omitempty"`
-	Scriptlets         Scriptlets    `yaml:"scriptlets,omitempty"`
+	// Name of the package
+	Name string `json:"name"`
+	// Version of the package
+	Version string `json:"version"`
+	// Epoch of the package
+	//
+	// This is an integer that must be bumped when modifying a package within the same version.
+	Epoch              uint64        `json:"epoch"`
+	Description        string        `json:"description,omitempty"`
+	URL                string        `json:"url,omitempty"`
+	Commit             string        `json:"commit,omitempty"`
+	TargetArchitecture []string      `json:"target-architecture,omitempty"`
+	Copyright          []Copyright   `json:"copyright,omitempty"`
+	Dependencies       Dependencies  `json:"dependencies,omitempty"`
+	Options            PackageOption `json:"options,omitempty"`
+	Scriptlets         Scriptlets    `json:"scriptlets,omitempty"`
 }
 
 // PackageURL returns the package URL ("purl") for the package. For more
@@ -100,9 +105,9 @@ func (p Package) PackageURL(distro string) string {
 }
 
 type Copyright struct {
-	Paths       []string `yaml:"paths,omitempty"`
-	Attestation string   `yaml:"attestation,omitempty"`
-	License     string   `yaml:"license"`
+	Paths       []string `json:"paths,omitempty"`
+	Attestation string   `json:"attestation,omitempty"`
+	License     string   `json:"license"`
 }
 
 // LicenseExpression returns an SPDX license expression formed from the
@@ -136,37 +141,43 @@ type Needs struct {
 }
 
 type PipelineAssertions struct {
-	RequiredSteps int `yaml:"required-steps,omitempty"`
+	RequiredSteps int `json:"required-steps,omitempty"`
 }
 
 type Pipeline struct {
-	Name       string             `yaml:"name,omitempty"`
-	Uses       string             `yaml:"uses,omitempty"`
-	With       map[string]string  `yaml:"with,omitempty"`
-	Runs       string             `yaml:"runs,omitempty"`
-	Pipeline   []Pipeline         `yaml:"pipeline,omitempty"`
-	Inputs     map[string]Input   `yaml:"inputs,omitempty"`
-	Needs      Needs              `yaml:"needs,omitempty"`
-	Label      string             `yaml:"label,omitempty"`
-	If         string             `yaml:"if,omitempty"`
-	Assertions PipelineAssertions `yaml:"assertions,omitempty"`
-	WorkDir    string             `yaml:"working-directory,omitempty"`
-	logger     apko_log.Logger
-	steps      int
-	SBOM       SBOM `yaml:"sbom,omitempty"`
+	Name string `json:"name,omitempty"`
+	// The name of a builtin reusable pipeline to use
+	Uses string `json:"uses,omitempty"`
+	// Arguments passed to the reusable pipelines specified in `uses`
+	With map[string]string `json:"with,omitempty"`
+	// Runs command line programs using the builtin shell
+	Runs string `json:"runs,omitempty"`
+	// Defines a sub pipeline inheriting all the parent options
+	Pipeline   []Pipeline         `json:"pipeline,omitempty"`
+	Inputs     map[string]Input   `json:"inputs,omitempty"`
+	Needs      Needs              `json:"needs,omitempty"`
+	Label      string             `json:"label,omitempty"`
+	If         string             `json:"if,omitempty"`
+	Assertions PipelineAssertions `json:"assertions,omitempty"`
+	// The working directory of the pipeline and all child pipelines.
+	// If the directory does not exist, it will be created.
+	WorkDir string `json:"working-directory,omitempty"`
+	logger  apko_log.Logger
+	steps   int
+	SBOM    SBOM `json:"sbom,omitempty"`
 }
 
 type Subpackage struct {
-	If           string        `yaml:"if,omitempty"`
-	Range        string        `yaml:"range,omitempty"`
-	Name         string        `yaml:"name"`
-	Pipeline     []Pipeline    `yaml:"pipeline,omitempty"`
-	Dependencies Dependencies  `yaml:"dependencies,omitempty"`
-	Options      PackageOption `yaml:"options,omitempty"`
-	Scriptlets   Scriptlets    `yaml:"scriptlets,omitempty"`
-	Description  string        `yaml:"description,omitempty"`
-	URL          string        `yaml:"url,omitempty"`
-	Commit       string        `yaml:"commit,omitempty"`
+	If           string        `json:"if,omitempty"`
+	Range        string        `json:"range,omitempty"`
+	Name         string        `json:"name"`
+	Pipeline     []Pipeline    `json:"pipeline,omitempty"`
+	Dependencies Dependencies  `json:"dependencies,omitempty"`
+	Options      PackageOption `json:"options,omitempty"`
+	Scriptlets   Scriptlets    `json:"scriptlets,omitempty"`
+	Description  string        `json:"description,omitempty"`
+	URL          string        `json:"url,omitempty"`
+	Commit       string        `json:"commit,omitempty"`
 }
 
 // PackageURL returns the package URL ("purl") for the subpackage. For more
@@ -183,7 +194,7 @@ func (spkg Subpackage) PackageURL(distro, packageVersionWithRelease string) stri
 }
 
 type SBOM struct {
-	Language string `yaml:"language"`
+	Language string `json:"language"`
 }
 
 type Input struct {
@@ -193,27 +204,31 @@ type Input struct {
 }
 
 type Configuration struct {
-	Package     Package
-	Environment apko_types.ImageConfiguration
-	Pipeline    []Pipeline   `yaml:"pipeline,omitempty"`
-	Subpackages []Subpackage `yaml:"subpackages,omitempty"`
-	Data        []RangeData  `yaml:"data,omitempty"`
-	Secfixes    Secfixes     `yaml:"secfixes,omitempty"`
-	Advisories  Advisories   `yaml:"advisories,omitempty"`
-	Update      Update       `yaml:"update,omitempty"`
+	// Properties defining the package metadata
+	Package Package `json:"package"`
+	// Properties defining the build environment
+	Environment apko_types.ImageConfiguration `json:"environment"`
+	// Sequence of steps defining the build process
+	Pipeline    []Pipeline   `json:"pipeline,omitempty"`
+	Subpackages []Subpackage `json:"subpackages,omitempty"`
+	// Arbitrary template data referenceable in (sub)pipelines
+	Data       []RangeData `json:"data,omitempty"`
+	Secfixes   Secfixes    `json:"secfixes,omitempty"`
+	Advisories Advisories  `json:"advisories,omitempty"`
+	Update     Update      `json:"update,omitempty"`
 
-	Vars map[string]string `yaml:"vars,omitempty"`
+	Vars map[string]string `json:"vars,omitempty"`
 
-	VarTransforms []VarTransforms `yaml:"var-transforms,omitempty"`
+	VarTransforms []VarTransforms `json:"var-transforms,omitempty"`
 
-	Options map[string]BuildOption `yaml:"options,omitempty"`
+	Options map[string]BuildOption `json:"options,omitempty"`
 }
 
 type VarTransforms struct {
-	From    string `yaml:"from"`
-	Match   string `yaml:"match"`
-	Replace string `yaml:"replace"`
-	To      string `yaml:"to"`
+	From    string `json:"from"`
+	Match   string `json:"match"`
+	Replace string `json:"replace"`
+	To      string `json:"to"`
 }
 
 // TODO: ensure that there's no net effect to secdb!
@@ -223,37 +238,37 @@ type Secfixes map[string][]string
 type Advisories map[string][]AdvisoryContent
 
 type AdvisoryContent struct {
-	Timestamp       time.Time         `yaml:"timestamp"`
-	Status          vex.Status        `yaml:"status"`
-	Justification   vex.Justification `yaml:"justification,omitempty"`
-	ImpactStatement string            `yaml:"impact,omitempty"`
-	ActionStatement string            `yaml:"action,omitempty"`
-	FixedVersion    string            `yaml:"fixed-version,omitempty"`
+	Timestamp       time.Time         `json:"timestamp"`
+	Status          vex.Status        `json:"status"`
+	Justification   vex.Justification `json:"justification,omitempty"`
+	ImpactStatement string            `json:"impact,omitempty"`
+	ActionStatement string            `json:"action,omitempty"`
+	FixedVersion    string            `json:"fixed-version,omitempty"`
 }
 
 // Update provides information used to describe how to keep the package up to date
 type Update struct {
-	Enabled             bool            `yaml:"enabled"`                         // toggle if updates should occur
-	Manual              bool            `yaml:"manual"`                          // indicates that this package should be manually updated, usually taking care over special version numbers
-	Shared              bool            `yaml:"shared,omitempty"`                // indicate that an update to this package requires an epoch bump of downstream dependencies, e.g. golang, java
-	VersionSeparator    string          `yaml:"version-separator,omitempty"`     // override the version separator if it is nonstandard
-	IgnoreRegexPatterns []string        `yaml:"ignore-regex-patterns,omitempty"` // a slice of regex patterns to match an upstream version and ignore
-	ReleaseMonitor      *ReleaseMonitor `yaml:"release-monitor,omitempty"`
-	GitHubMonitor       *GitHubMonitor  `yaml:"github,omitempty"`
+	Enabled             bool            `json:"enabled"`                         // toggle if updates should occur
+	Manual              bool            `json:"manual,omitempty"`                // indicates that this package should be manually updated, usually taking care over special version numbers
+	Shared              bool            `json:"shared,omitempty"`                // indicate that an update to this package requires an epoch bump of downstream dependencies, e.g. golang, java
+	VersionSeparator    string          `json:"version-separator,omitempty"`     // override the version separator if it is nonstandard
+	IgnoreRegexPatterns []string        `json:"ignore-regex-patterns,omitempty"` // a slice of regex patterns to match an upstream version and ignore
+	ReleaseMonitor      *ReleaseMonitor `json:"release-monitor,omitempty"`
+	GitHubMonitor       *GitHubMonitor  `json:"github,omitempty"`
 }
 
 // ReleaseMonitor indicates using the API for https://release-monitoring.org/
 type ReleaseMonitor struct {
-	Identifier int `yaml:"identifier"` // ID number for release monitor
+	Identifier int `json:"identifier"` // ID number for release monitor
 }
 
 // GitHubMonitor indicates using the GitHub API
 type GitHubMonitor struct {
-	Identifier  string `yaml:"identifier"`             // org/repo for GitHub
-	StripPrefix string `yaml:"strip-prefix,omitempty"` // if the version in GitHub contains a prefix which should be ignored
-	StripSuffix string `yaml:"strip-suffix,omitempty"` // if the version in GitHub contains a suffix which should be ignored
-	TagFilter   string `yaml:"tag-filter,omitempty"`   // filter to apply when searching tags on a GitHub repository
-	UseTags     bool   `yaml:"use-tag,omitempty"`      // override the default of using a GitHub release to identify related tag to fetch.  Not all projects use GitHub releases but just use tags
+	Identifier  string `json:"identifier"`             // org/repo for GitHub
+	StripPrefix string `json:"strip-prefix,omitempty"` // if the version in GitHub contains a prefix which should be ignored
+	StripSuffix string `json:"strip-suffix,omitempty"` // if the version in GitHub contains a suffix which should be ignored
+	TagFilter   string `json:"tag-filter,omitempty"`   // filter to apply when searching tags on a GitHub repository
+	UseTags     bool   `json:"use-tag,omitempty"`      // override the default of using a GitHub release to identify related tag to fetch.  Not all projects use GitHub releases but just use tags
 }
 
 func (ac AdvisoryContent) Validate() error {
@@ -280,43 +295,11 @@ func (ac AdvisoryContent) Validate() error {
 }
 
 type RangeData struct {
-	Name  string       `yaml:"name"`
-	Items DataItemList `yaml:"items"`
+	Name  string    `json:"name"`
+	Items DataItems `json:"items"`
 }
 
-type DataItemList []DataItem
-
-func (d *DataItemList) UnmarshalYAML(n *yaml.Node) error {
-	if d == nil {
-		return nil
-	}
-	var m map[string]string
-	if err := n.Decode(&m); err != nil {
-		return err
-	}
-	out := make([]DataItem, 0, len(*d))
-	for k, v := range m {
-		out = append(out, DataItem{Key: k, Value: v})
-	}
-	sort.Slice(out, func(i, j int) bool { return out[i].Key < out[j].Key })
-	*d = out
-	return nil
-}
-
-func (d *DataItemList) MarshalYAML() (interface{}, error) {
-	if d == nil {
-		return nil, nil
-	}
-	m := map[string]string{}
-	for _, i := range *d {
-		m[i.Key] = m[i.Value]
-	}
-	return m, nil
-}
-
-type DataItem struct {
-	Key, Value string
-}
+type DataItems map[string]string
 
 type Context struct {
 	Configuration      Configuration
@@ -359,11 +342,11 @@ type Context struct {
 }
 
 type Dependencies struct {
-	Runtime  []string `yaml:"runtime,omitempty"`
-	Provides []string `yaml:"provides,omitempty"`
-	Replaces []string `yaml:"replaces,omitempty"`
+	Runtime  []string `json:"runtime,omitempty"`
+	Provides []string `json:"provides,omitempty"`
+	Replaces []string `json:"replaces,omitempty"`
 
-	ProviderPriority int `yaml:"provider-priority,omitempty"`
+	ProviderPriority int `json:"provider-priority,omitempty"`
 }
 
 var ErrSkipThisArch = errors.New("error: skip this arch")
@@ -893,7 +876,7 @@ func ParseConfiguration(configurationFilePath string, opts ...ConfigurationParsi
 		cfg.Package.Commit = detectedCommit
 	}
 
-	datas := map[string][]DataItem{}
+	datas := make(map[string]DataItems)
 	for _, d := range cfg.Data {
 		datas[d.Name] = d.Items
 	}
@@ -912,8 +895,16 @@ func ParseConfiguration(configurationFilePath string, opts ...ConfigurationParsi
 			return nil, fmt.Errorf("unable to parse configuration file %q: subpackage %q specified undefined range: %q", configurationFilePath, sp.Name, sp.Range)
 		}
 
-		for _, it := range items {
-			k, v := it.Key, it.Value
+		keys := make([]string, 0, len(items))
+		for k := range items {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+
+		for _, k := range keys {
+			// for k, v := range items {
+			// k, v := it.Key, it.Value
+			v := items[k]
 			replacer := replacerFromMap(map[string]string{
 				"${{range.key}}":   k,
 				"${{range.value}}": v,
